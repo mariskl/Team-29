@@ -2,8 +2,10 @@ package com.datorium.Datorium.API.Services;
 
 import com.datorium.Datorium.API.DTO.User;
 import com.datorium.Datorium.API.Repo.UserRepo;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -17,19 +19,23 @@ public class UserService {
         this.userRepo = userRepo;
     }
 
-    public int add(User user) {
-        return userRepo.add(user);
+    public void add(User user) throws BadRequestException {
+        if(user.name == null || user.name.isEmpty()){
+            throw new BadRequestException("User name is empty");
+        }
+
+        userRepo.add(user);
     }
 
-    //public List<User> getAllUsers() {
-     //   return userRepo.findAll();
-    //}
-
-    public List<User> get(){
+    public ArrayList<User> get(){
         return userRepo.get();
     }
 
-   public User update(int userIndex, User updateUserDTO){
-       return userRepo.update(userIndex, updateUserDTO);
-   }
+    public User update(User user){
+        userRepo.update(user);
+        return user; //TODO: THIS IS A HACK, we should remove this
+    }
+    public void delete(int id){
+        userRepo.delete(id);
+    }
 }

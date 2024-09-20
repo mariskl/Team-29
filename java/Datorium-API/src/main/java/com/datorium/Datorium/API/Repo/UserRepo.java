@@ -1,59 +1,72 @@
 package com.datorium.Datorium.API.Repo;
 
-import com.datorium.Datorium.API.DTO.User;
 import org.springframework.stereotype.Repository;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 public class UserRepo {
-
-    private final List<User> users = new ArrayList<>(); //Mocked db
-
-    public int add(User user){
+    public void add(com.datorium.Datorium.API.DTO.User user){
         String url = "jdbc:sqlite:my.db";
         try (var conn = DriverManager.getConnection(url)) {
             if (conn != null) {
                 var statement = conn.createStatement();
                 statement.execute("INSERT INTO people (name) VALUES ('" + user.name + "')");
-                //INSERT INTO people (name) VALUES ('');DROP TABLE people;--')
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-        return 1;
     }
 
-    public List<User> get() {
-        String url = "jdbc:sqlite:my.db"; //LOCATION of database
-        var resultList = new ArrayList<User>(); //prepare a box
+    public ArrayList<com.datorium.Datorium.API.DTO.User> get(){
+        String url = "jdbc:sqlite:my.db"; //LOCATION OF database
+        var resultList = new ArrayList<com.datorium.Datorium.API.DTO.User>(); // prepare a box
         try (var conn = DriverManager.getConnection(url)) {
             if (conn != null) {
-                var statement = conn.createStatement();//Create action what to do
-                var result = statement.executeQuery("SELECT name FROM people");
+                var statement = conn.createStatement(); //Create action what to do
+                var result = statement.executeQuery("SELECT id, name FROM people");
                 //DIFFERENT BOX, but more abstract
 
                 while(result.next()){ //going through abstract box
-                    var user =new User();//Create new user
-                    var name = result.getString("name");//assign name to the new user
-                    user.setName(name);
-                    resultList.add(user);// Add user to the box
-                } //While loop stops when there is no nmext element
+                    var user = new com.datorium.Datorium.API.DTO.User(); //Create new user
+                    user.id = result.getInt("id");
+                    user.name = result.getString("name");;
+                    resultList.add(user); //Add user to the box
+                } //While loop stops when there is no next element
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+
         return resultList; //Return all the users assigned to the box
     }
 
-
-    public User update(int numberOfChristmasPresents, User updateUserDTO){
-        var user = users.get(numberOfChristmasPresents);
-        user.name = updateUserDTO.name;
-        return user;
+    public void update(com.datorium.Datorium.API.DTO.User user){
+        String url = "jdbc:sqlite:my.db";
+        try (var conn = DriverManager.getConnection(url)) {
+            if (conn != null) {
+                var statement = conn.createStatement();
+                statement.execute("UPDATE people SET name = '"
+                        + user.name + "' WHERE id = " + user.id);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
+
+    public void delete(int id){
+        String url = "jdbc:sqlite:my.db";
+        try (var conn = DriverManager.getConnection(url)) {
+            if (conn != null) {
+                var statement = conn.createStatement();
+                statement.execute("DELETE FROM people WHERE id = " + id);
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
 }
 
